@@ -1,0 +1,800 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>攻击特效动画预览 - FX_Texbeiyong_42</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Microsoft YaHei', sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            color: #fff;
+        }
+        
+        h1 {
+            margin-bottom: 10px;
+            text-shadow: 0 0 20px rgba(147, 51, 234, 0.5);
+        }
+        
+        .subtitle {
+            color: #888;
+            margin-bottom: 30px;
+        }
+        
+        /* 主展示区域 */
+        .main-display {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 16px;
+            padding: 40px;
+            margin-bottom: 30px;
+            border: 2px solid rgba(147, 51, 234, 0.3);
+            box-shadow: 0 0 40px rgba(147, 51, 234, 0.2);
+        }
+        
+        #gameCanvas {
+            image-rendering: pixelated;
+            image-rendering: crisp-edges;
+        }
+        
+        /* 控制面板 */
+        .controls {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+        
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #9333ea, #7c3aed);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(147, 51, 234, 0.4);
+        }
+        
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+        
+        /* 参数调节 */
+        .settings {
+            display: flex;
+            gap: 30px;
+            flex-wrap: wrap;
+            justify-content: center;
+            background: rgba(0, 0, 0, 0.2);
+            padding: 20px 30px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+        }
+        
+        .setting-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .setting-item label {
+            font-size: 12px;
+            color: #aaa;
+            text-transform: uppercase;
+        }
+        
+        .setting-item input[type="range"] {
+            width: 150px;
+        }
+        
+        .setting-item span {
+            font-size: 14px;
+            color: #9333ea;
+            font-weight: bold;
+        }
+        
+        /* 帧预览 */
+        .frame-preview {
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 12px;
+            padding: 20px;
+            width: 100%;
+            max-width: 800px;
+        }
+        
+        .frame-preview h3 {
+            margin-bottom: 15px;
+            color: #aaa;
+            font-size: 14px;
+        }
+        
+        .frames-container {
+            display: flex;
+            gap: 10px;
+            overflow-x: auto;
+            padding: 10px;
+        }
+        
+        .frame-thumb {
+            width: 64px;
+            height: 64px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 8px;
+            cursor: pointer;
+            border: 2px solid transparent;
+            transition: all 0.3s ease;
+            flex-shrink: 0;
+        }
+        
+        .frame-thumb:hover {
+            border-color: #9333ea;
+            transform: scale(1.1);
+        }
+        
+        .frame-thumb.active {
+            border-color: #9333ea;
+            box-shadow: 0 0 15px rgba(147, 51, 234, 0.5);
+        }
+        
+        /* 代码导出区域 */
+        .code-export {
+            margin-top: 20px;
+            width: 100%;
+            max-width: 800px;
+        }
+        
+        .code-export h3 {
+            margin-bottom: 10px;
+            color: #aaa;
+            font-size: 14px;
+        }
+        
+        .code-block {
+            background: #0d1117;
+            border-radius: 8px;
+            padding: 20px;
+            overflow-x: auto;
+            font-family: 'Consolas', monospace;
+            font-size: 13px;
+            line-height: 1.6;
+            color: #c9d1d9;
+            border: 1px solid #30363d;
+        }
+        
+        .code-block .keyword { color: #ff7b72; }
+        .code-block .string { color: #a5d6ff; }
+        .code-block .comment { color: #8b949e; }
+        .code-block .function { color: #d2a8ff; }
+        
+        /* 背景效果切换 */
+        .bg-options {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        
+        .bg-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            border: 2px solid transparent;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .bg-btn:hover, .bg-btn.active {
+            border-color: #9333ea;
+            transform: scale(1.1);
+        }
+
+        /* 文件选择区域 */
+        .file-selector {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            background: rgba(0, 0, 0, 0.2);
+            padding: 15px 25px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+        }
+
+        .file-name {
+            color: #888;
+            font-size: 14px;
+            max-width: 300px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .file-name.has-file {
+            color: #4ade80;
+        }
+    </style>
+</head>
+<body>
+        <h1>⚡ 攻击特效动画预览</h1>
+    <p class="subtitle">点击选择图片开始预览</p>
+
+    <!-- 文件选择区域 -->
+    <div class="file-selector">
+        <input type="file" id="fileInput" accept="image/*" style="display: none;">
+        <button class="btn btn-primary" id="selectFileBtn">📁 选择图片</button>
+        <span id="fileName" class="file-name">未选择文件</span>
+    </div>
+
+    <!-- 主展示区域 -->
+    <div class="main-display">
+        <canvas id="gameCanvas" width="400" height="400"></canvas>
+    </div>
+
+    <!-- 控制按钮 -->
+    <div class="controls">
+        <button class="btn btn-primary" id="playBtn">▶ 播放</button>
+        <button class="btn btn-secondary" id="pauseBtn">⏸ 暂停</button>
+        <button class="btn btn-secondary" id="resetBtn">⏹ 重置</button>
+        <button class="btn btn-secondary" id="loopBtn">🔁 循环: 开</button>
+    </div>
+    
+    <!-- 参数调节 -->
+    <div class="settings">
+        <div class="setting-item">
+            <label>动画速度 (FPS)</label>
+            <input type="range" id="fpsSlider" min="1" max="60" value="12">
+            <span id="fpsValue">12 FPS</span>
+        </div>
+        <div class="setting-item">
+            <label>缩放比例</label>
+            <input type="range" id="scaleSlider" min="1" max="8" value="4">
+            <span id="scaleValue">4x</span>
+        </div>
+        <div class="setting-item">
+            <label>网格行数</label>
+            <input type="range" id="rowsSlider" min="1" max="10" value="4">
+            <span id="rowsValue">4行</span>
+        </div>
+        <div class="setting-item">
+            <label>网格列数</label>
+            <input type="range" id="colsSlider" min="1" max="10" value="4">
+            <span id="colsValue">4列</span>
+        </div>
+        <div class="setting-item">
+            <label>背景颜色</label>
+            <div class="bg-options">
+                <div class="bg-btn active" style="background: #1a1a2e" data-bg="#1a1a2e"></div>
+                <div class="bg-btn" style="background: #000" data-bg="#000000"></div>
+                <div class="bg-btn" style="background: #fff" data-bg="#ffffff"></div>
+                <div class="bg-btn" style="background: #2d5016" data-bg="#2d5016"></div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 帧预览 -->
+    <div class="frame-preview">
+        <h3>📁 帧序列 (点击跳转)</h3>
+        <div class="frames-container" id="framesContainer"></div>
+    </div>
+    
+    <!-- 代码导出 -->
+    <div class="code-export">
+        <h3>📋 游戏开发代码参考</h3>
+        <div class="code-block" id="codeBlock">
+// 加载精灵图 - 自动检测布局
+const spriteSheet = new Image();
+spriteSheet.src = 'your_sprite_sheet.png';
+
+// 动画配置 - 程序会自动检测以下值
+const animConfig = {
+    frameWidth: 32,      // 自动检测每帧宽度
+    frameHeight: 32,     // 自动检测每帧高度
+    cols: 3,             // 自动检测列数
+    rows: 3,             // 自动检测行数
+    frames: 9,           // 总帧数 (cols * rows)
+    fps: 12,             // 播放速度
+    loop: true           // 是否循环
+};
+
+        // 自适应绘制当前帧
+function drawFrame(ctx, frameIndex, x, y, scale = 1) {
+    const cols = animConfig.cols || 4;  // 自动检测的列数
+    const col = frameIndex % cols;
+    const row = Math.floor(frameIndex / cols);
+    
+    ctx.drawImage(
+        spriteSheet,
+        col * animConfig.frameWidth,
+        row * animConfig.frameHeight,
+        animConfig.frameWidth,
+        animConfig.frameHeight,
+        x, y,
+        animConfig.frameWidth * scale,
+        animConfig.frameHeight * scale
+    );
+}
+        </div>
+    </div>
+
+    <script>
+        // 动画播放器类 - 支持自动检测网格布局
+        class SpriteAnimator {
+            constructor(canvasId) {
+                this.canvas = document.getElementById(canvasId);
+                this.ctx = this.canvas.getContext('2d');
+                this.spriteSheet = new Image();
+                this.frames = [];
+                this.currentFrame = 0;
+                this.isPlaying = false;
+                this.isLooping = true;
+                this.fps = 12;
+                this.scale = 4;
+                this.lastFrameTime = 0;
+                this.frameInterval = 1000 / this.fps;
+                this.bgColor = '#1a1a2e';
+                
+                // 配置 - 自动检测
+                this.cols = 0;
+                this.rows = 0;
+                this.frameWidth = 0;
+                this.frameHeight = 0;
+                
+                this.init();
+            }
+            
+            init() {
+                // 初始化空画布
+                this.drawEmpty();
+                // 开始动画循环
+                this.animate();
+            }
+
+            // 加载选择的文件
+            loadFile(file) {
+                if (!file) return;
+
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    this.spriteSheet = new Image();
+                    this.spriteSheet.onload = () => {
+                        this.autoDetectGrid();
+                        // 默认使用 3x3 布局
+                        this.rows = 3;
+                        this.cols = 3;
+                        this.currentFrame = 0;
+                        this.isPlaying = false;
+                        this.setupFrames();
+                        this.createFrameThumbnails();
+                        this.updateInfo();
+                        this.draw();
+
+                        // 更新UI
+                        document.getElementById('rowsSlider').value = this.rows;
+                        document.getElementById('colsSlider').value = this.cols;
+                        document.getElementById('rowsValue').textContent = this.rows + '行';
+                        document.getElementById('colsValue').textContent = this.cols + '列';
+                    };
+                    this.spriteSheet.src = e.target.result;
+                };
+                reader.readAsDataURL(file);
+            }
+
+            // 绘制空状态
+            drawEmpty() {
+                this.ctx.fillStyle = this.bgColor;
+                this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+
+                this.ctx.fillStyle = '#555';
+                this.ctx.font = '16px Microsoft YaHei';
+                this.ctx.textAlign = 'center';
+                this.ctx.fillText('请点击上方"选择图片"按钮', this.canvas.width / 2, this.canvas.height / 2 - 10);
+                this.ctx.fillText('加载精灵图动画', this.canvas.width / 2, this.canvas.height / 2 + 20);
+            }
+
+            // 自动查找精灵图文件 (备用)
+            findSpriteImage() {
+                // 常见精灵图命名
+                const candidates = [
+                    'vfx_xulie_10_lx.png',
+                    'FX_Texbeiyong_42.png',
+                    'fx_ADSAJ11.png',
+                    'blade_0016.png',
+                    'baodian_ysf_013.png',
+                    'boss0010_png_017.png',
+                    'sprite.png',
+                    'sheet.png',
+                    'animation.png'
+                ];
+                
+                // 返回第一个存在的（实际浏览器会尝试加载）
+                return candidates[0];
+            }
+            
+            // 自动检测网格布局
+            autoDetectGrid() {
+                const width = this.spriteSheet.width;
+                const height = this.spriteSheet.height;
+                
+                // 常见游戏精灵图布局
+                const commonLayouts = [
+                    { rows: 1, cols: 8 },   // 1x8 横排
+                    { rows: 8, cols: 1 },   // 8x1 竖排
+                    { rows: 2, cols: 4 },   // 2x4
+                    { rows: 2, cols: 5 },   // 2x5
+                    { rows: 3, cols: 3 },   // 3x3
+                    { rows: 3, cols: 4 },   // 3x4
+                    { rows: 3, cols: 5 },   // 3x5
+                    { rows: 4, cols: 2 },   // 4x2
+                    { rows: 4, cols: 3 },   // 4x3
+                    { rows: 4, cols: 4 },   // 4x4
+                    { rows: 4, cols: 5 },   // 4x5
+                    { rows: 4, cols: 6 },   // 4x6
+                    { rows: 5, cols: 2 },   // 5x2
+                    { rows: 5, cols: 3 },   // 5x3
+                    { rows: 5, cols: 4 },   // 5x4
+                    { rows: 5, cols: 5 },   // 5x5
+                    { rows: 6, cols: 5 },   // 6x5
+                    { rows: 8, cols: 8 },   // 8x8
+                ];
+                
+                let bestLayout = null;
+                let minAspectDiff = Infinity;
+                
+                for (const layout of commonLayouts) {
+                    const frameW = width / layout.cols;
+                    const frameH = height / layout.rows;
+                    
+                    // 确保能整除
+                    if (frameW !== Math.floor(frameW) || frameH !== Math.floor(frameH)) {
+                        continue;
+                    }
+                    
+                    // 帧尺寸应该接近正方形（大多数精灵图是这样）
+                    const aspectRatio = Math.max(frameW, frameH) / Math.min(frameW, frameH);
+                    const aspectDiff = Math.abs(aspectRatio - 1);
+                    
+                    // 优先选择更接近正方形的布局
+                    if (aspectDiff < minAspectDiff) {
+                        minAspectDiff = aspectDiff;
+                        bestLayout = layout;
+                    }
+                }
+                
+                if (bestLayout) {
+                    this.rows = bestLayout.rows;
+                    this.cols = bestLayout.cols;
+                } else {
+                    // 回退：尝试找最大公约数
+                    this.rows = this.findBestDivisor(height);
+                    this.cols = this.findBestDivisor(width);
+                }
+                
+                console.log(`检测到网格布局: ${this.rows}x${this.cols}, 共 ${this.rows * this.cols} 帧`);
+            }
+            
+            // 找最佳除数（使帧接近正方形）
+            findBestDivisor(size) {
+                const divisors = [];
+                for (let i = 1; i <= Math.min(16, size); i++) {
+                    if (size % i === 0) {
+                        divisors.push(i);
+                    }
+                }
+                // 返回中间的值（平衡行列数）
+                return divisors[Math.floor(divisors.length / 2)] || 1;
+            }
+            
+            // 更新页面信息
+            updateInfo() {
+                const subtitle = document.querySelector('.subtitle');
+                subtitle.textContent = `检测到布局: ${this.rows}×${this.cols} = ${this.rows * this.cols}帧 | 帧尺寸: ${this.frameWidth}×${this.frameHeight}px`;
+            }
+            
+            setupFrames() {
+                this.frameWidth = this.spriteSheet.width / this.cols;
+                this.frameHeight = this.spriteSheet.height / this.rows;
+                
+                // 创建帧数据
+                this.frames = [];
+                for (let i = 0; i < this.rows * this.cols; i++) {
+                    const col = i % this.cols;
+                    const row = Math.floor(i / this.cols);
+                    this.frames.push({ col, row });
+                }
+            }
+            
+            createFrameThumbnails() {
+                const container = document.getElementById('framesContainer');
+                container.innerHTML = '';
+                
+                this.frames.forEach((frame, index) => {
+                    const canvas = document.createElement('canvas');
+                    canvas.width = 64;
+                    canvas.height = 64;
+                    canvas.className = 'frame-thumb';
+                    canvas.dataset.frame = index;
+                    
+                    const ctx = canvas.getContext('2d');
+                    ctx.imageSmoothingEnabled = false;
+                    
+                    // 绘制缩略图
+                    const scale = Math.min(64 / this.frameWidth, 64 / this.frameHeight);
+                    const w = this.frameWidth * scale;
+                    const h = this.frameHeight * scale;
+                    const x = (64 - w) / 2;
+                    const y = (64 - h) / 2;
+                    
+                    ctx.drawImage(
+                        this.spriteSheet,
+                        frame.col * this.frameWidth,
+                        frame.row * this.frameHeight,
+                        this.frameWidth,
+                        this.frameHeight,
+                        x, y, w, h
+                    );
+                    
+                    canvas.addEventListener('click', () => {
+                        this.currentFrame = index;
+                        this.pause();
+                        this.draw();
+                        this.updateActiveThumbnail();
+                    });
+                    
+                    container.appendChild(canvas);
+                });
+                
+                this.updateActiveThumbnail();
+            }
+            
+            updateActiveThumbnail() {
+                document.querySelectorAll('.frame-thumb').forEach((thumb, index) => {
+                    thumb.classList.toggle('active', index === this.currentFrame);
+                });
+            }
+            
+            draw() {
+                // 清空画布
+                this.ctx.fillStyle = this.bgColor;
+                this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+                
+                if (!this.frames.length) return;
+                
+                const frame = this.frames[this.currentFrame];
+                
+                // 计算居中位置
+                const drawWidth = this.frameWidth * this.scale;
+                const drawHeight = this.frameHeight * this.scale;
+                const x = (this.canvas.width - drawWidth) / 2;
+                const y = (this.canvas.height - drawHeight) / 2;
+                
+                // 使用 nearest-neighbor 保持像素清晰
+                this.ctx.imageSmoothingEnabled = false;
+                
+                // 绘制当前帧
+                this.ctx.drawImage(
+                    this.spriteSheet,
+                    frame.col * this.frameWidth,
+                    frame.row * this.frameHeight,
+                    this.frameWidth,
+                    this.frameHeight,
+                    x, y,
+                    drawWidth,
+                    drawHeight
+                );
+                
+                this.updateActiveThumbnail();
+            }
+            
+            animate(timestamp) {
+                if (this.isPlaying && timestamp) {
+                    const elapsed = timestamp - this.lastFrameTime;
+                    
+                    if (elapsed >= this.frameInterval) {
+                        this.nextFrame();
+                        this.lastFrameTime = timestamp;
+                    }
+                }
+                
+                requestAnimationFrame((t) => this.animate(t));
+            }
+            
+            nextFrame() {
+                this.currentFrame++;
+                
+                if (this.currentFrame >= this.frames.length) {
+                    if (this.isLooping) {
+                        this.currentFrame = 0;
+                    } else {
+                        this.currentFrame = this.frames.length - 1;
+                        this.pause();
+                    }
+                }
+                
+                this.draw();
+            }
+            
+            play() {
+                this.isPlaying = true;
+                this.lastFrameTime = performance.now();
+            }
+            
+            pause() {
+                this.isPlaying = false;
+            }
+            
+            reset() {
+                this.pause();
+                this.currentFrame = 0;
+                this.draw();
+            }
+            
+            setFPS(fps) {
+                this.fps = fps;
+                this.frameInterval = 1000 / fps;
+            }
+            
+            setScale(scale) {
+                this.scale = scale;
+                this.draw();
+            }
+            
+            setBgColor(color) {
+                this.bgColor = color;
+                this.draw();
+            }
+            
+            toggleLoop() {
+                this.isLooping = !this.isLooping;
+                return this.isLooping;
+            }
+            
+            // 手动设置网格布局
+            setGrid(rows, cols) {
+                this.rows = rows;
+                this.cols = cols;
+                this.currentFrame = 0;
+                this.setupFrames();
+                this.createFrameThumbnails();
+                this.updateInfo();
+                this.draw();
+            }
+        }
+        
+        // 初始化
+        const animator = new SpriteAnimator('gameCanvas');
+        
+        // 事件绑定
+        document.getElementById('playBtn').addEventListener('click', () => {
+            animator.play();
+        });
+        
+        document.getElementById('pauseBtn').addEventListener('click', () => {
+            animator.pause();
+        });
+        
+        document.getElementById('resetBtn').addEventListener('click', () => {
+            animator.reset();
+        });
+        
+        document.getElementById('loopBtn').addEventListener('click', function() {
+            const isLooping = animator.toggleLoop();
+            this.textContent = isLooping ? '🔁 循环: 开' : '➡️ 循环: 关';
+        });
+        
+        // FPS 滑块
+        document.getElementById('fpsSlider').addEventListener('input', function() {
+            const fps = parseInt(this.value);
+            animator.setFPS(fps);
+            document.getElementById('fpsValue').textContent = fps + ' FPS';
+        });
+        
+        // 缩放滑块
+        document.getElementById('scaleSlider').addEventListener('input', function() {
+            const scale = parseInt(this.value);
+            animator.setScale(scale);
+            document.getElementById('scaleValue').textContent = scale + 'x';
+        });
+        
+        // 行数滑块
+        document.getElementById('rowsSlider').addEventListener('input', function() {
+            const rows = parseInt(this.value);
+            const cols = parseInt(document.getElementById('colsSlider').value);
+            animator.setGrid(rows, cols);
+            document.getElementById('rowsValue').textContent = rows + '行';
+        });
+        
+        // 列数滑块
+        document.getElementById('colsSlider').addEventListener('input', function() {
+            const cols = parseInt(this.value);
+            const rows = parseInt(document.getElementById('rowsSlider').value);
+            animator.setGrid(rows, cols);
+            document.getElementById('colsValue').textContent = cols + '列';
+        });
+        
+        // 背景颜色切换
+        document.querySelectorAll('.bg-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                document.querySelectorAll('.bg-btn').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                animator.setBgColor(this.dataset.bg);
+            });
+        });
+        
+        // 同步滑块初始值
+        document.getElementById('rowsSlider').value = 3;
+        document.getElementById('colsSlider').value = 3;
+        document.getElementById('rowsValue').textContent = '3行';
+        document.getElementById('colsValue').textContent = '3列';
+
+        // 文件选择功能
+        const fileInput = document.getElementById('fileInput');
+        const selectFileBtn = document.getElementById('selectFileBtn');
+        const fileName = document.getElementById('fileName');
+
+        selectFileBtn.addEventListener('click', () => {
+            fileInput.click();
+        });
+
+        fileInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                fileName.textContent = file.name;
+                fileName.classList.add('has-file');
+                animator.loadFile(file);
+            }
+        });
+
+        // 支持拖拽上传
+        const dropZone = document.body;
+
+        dropZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropZone.style.background = 'rgba(147, 51, 234, 0.1)';
+        });
+
+        dropZone.addEventListener('dragleave', (e) => {
+            e.preventDefault();
+            dropZone.style.background = '';
+        });
+
+        dropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropZone.style.background = '';
+
+            const file = e.dataTransfer.files[0];
+            if (file && file.type.startsWith('image/')) {
+                fileName.textContent = file.name;
+                fileName.classList.add('has-file');
+                animator.loadFile(file);
+            }
+        });
+    </script>
+</body>
+</html>
