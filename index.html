@@ -308,38 +308,7 @@
     <div class="code-export">
         <h3>📋 游戏开发代码参考</h3>
         <div class="code-block" id="codeBlock">
-// 加载精灵图 - 自动检测布局
-const spriteSheet = new Image();
-spriteSheet.src = 'your_sprite_sheet.png';
 
-// 动画配置 - 程序会自动检测以下值
-const animConfig = {
-    frameWidth: 32,      // 自动检测每帧宽度
-    frameHeight: 32,     // 自动检测每帧高度
-    cols: 3,             // 自动检测列数
-    rows: 3,             // 自动检测行数
-    frames: 9,           // 总帧数 (cols * rows)
-    fps: 12,             // 播放速度
-    loop: true           // 是否循环
-};
-
-        // 自适应绘制当前帧
-function drawFrame(ctx, frameIndex, x, y, scale = 1) {
-    const cols = animConfig.cols || 4;  // 自动检测的列数
-    const col = frameIndex % cols;
-    const row = Math.floor(frameIndex / cols);
-    
-    ctx.drawImage(
-        spriteSheet,
-        col * animConfig.frameWidth,
-        row * animConfig.frameHeight,
-        animConfig.frameWidth,
-        animConfig.frameHeight,
-        x, y,
-        animConfig.frameWidth * scale,
-        animConfig.frameHeight * scale
-    );
-}
         </div>
     </div>
 
